@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LapieHUB Social</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+:root {
+  --grass:#5D9E2F;--grass-l:#7BC94A;--dirt:#866043;
+  --gold:#FFD700;--gold-d:#b8860b;--lapis:#1a4fa0;--lapis-l:#2d6fd6;
+  --diamond:#5DE8F5;--red:#e03030;--green:#3ddc3d;
+  --bg:#06090f;--panel:rgba(8,8,14,0.95);--text:#fffcf0;--gray:#555;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Press Start 2P',monospace;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--lapis-l);text-decoration:none}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#050505}::-webkit-scrollbar-thumb{background:#252525}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+
+/* ════════════ LOGIN ════════════ */
+#screen-login{
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 70% 50% at 50% 110%,rgba(93,158,47,.15) 0%,transparent 65%),
+  linear-gradient(180deg,#04060a 0%,#0a1520 55%,#0a160a 100%);
+}
+.login-box{background:var(--panel);border:4px solid #444;border-right-color:#111;border-bottom-color:#111;border-left-color:#666;border-top-color:#666;padding:30px 28px 24px;width:380px}
+.login-logo{font-size:14px;color:var(--gold);text-shadow:3px 3px 0 #5a3a00;text-align:center;margin-bottom:6px;letter-spacing:2px}
+.login-sub{font-size:6px;color:#333;text-align:center;margin-bottom:20px}
+.field-label{font-size:6px;color:#444;margin-bottom:5px;display:block}
+.mc-input{width:100%;padding:9px 11px;background:#050510;border:3px solid #222;border-left-color:#444;border-top-color:#444;color:var(--text);font-family:'Press Start 2P',monospace;font-size:8px;margin-bottom:12px;outline:none}
+.mc-input:focus{border-left-color:var(--lapis-l);border-top-color:var(--lapis-l)}
+.mc-btn{width:100%;padding:11px;background:var(--grass);border:3px solid var(--grass-l);border-right-color:#2a5a10;border-bottom-color:#2a5a10;color:#fff;font-family:'Press Start 2P',monospace;font-size:9px;cursor:pointer;text-shadow:2px 2px 0 #1a3a08}
+.mc-btn:hover{filter:brightness(1.1)}
+.mc-btn:active{transform:translate(2px,2px)}
+.login-err{font-size:6px;color:var(--red);text-align:center;margin-top:8px;min-height:16px}
+
+/* ════════════ APP ════════════ */
+#screen-app{display:none;flex-direction:column}
+#screen-app.active{display:flex}
+
+/* NAVBAR */
+nav{background:rgba(0,0,0,.96);border-bottom:3px solid var(--grass);padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 3px 0 var(--dirt)}
+.nav-logo{font-size:11px;color:var(--gold);text-shadow:2px 2px 0 #5a3a00;letter-spacing:1px}
+.nav-links{display:flex;gap:6px}
+.nav-btn{background:rgba(0,0,0,.6);border:2px solid #333;border-left-color:#555;border-top-color:#555;color:#888;font-family:'Press Start 2P',monospace;font-size:5px;padding:5px 8px;cursor:pointer;letter-spacing:1px;position:relative}
+.nav-btn:hover{color:var(--text);border-color:var(--gold)}
+.nav-btn.active{color:var(--gold);border-color:var(--gold-d)}
+.nav-btn:active{transform:translate(1px,1px)}
+.notif-dot{position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:var(--red);border-radius:50%;display:none}
+.nav-profile{display:flex;align-items:center;gap:8px;cursor:pointer}
+.nav-av{font-size:18px;width:28px;height:28px;border:2px solid #333;display:flex;align-items:center;justify-content:center}
+.nav-name{font-size:6px;color:#888}
+.nav-solde{font-size:5px;color:var(--gold)}
+
+/* VIEWS */
+.view{display:none;max-width:900px;margin:0 auto;padding:16px;width:100%}
+.view.active{display:block}
+
+/* PANEL */
+.panel{background:var(--panel);border:3px solid #2a2a2a;border-right-color:#111;border-bottom-color:#111;border-left-color:#444;border-top-color:#444;padding:14px;margin-bottom:12px}
+.ptitle{font-size:7px;color:var(--gold);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #1a1a1a;letter-spacing:1px}
+
+/* ── FEED ── */
+.post-input-wrap{display:flex;flex-direction:column;gap:8px}
+.post-textarea{width:100%;padding:10px;background:#050510;border:2px solid #222;border-left-color:#444;border-top-color:#444;color:var(--text);font-family:'Press Start 2P',monospace;font-size:7px;resize:none;height:80px;outline:none;line-height:1.8}
+.post-textarea:focus{border-left-color:var(--lapis-l)}
+.post-btn{background:var(--lapis);border:2px solid var(--lapis-l);border-right-color:#0a2060;border-bottom-color:#0a2060;color:#fff;font-family:'Press Start 2P',monospace;font-size:6px;padding:8px 16px;cursor:pointer;align-self:flex-end}
+.post-btn:active{transform:translate(1px,1px)}
+
+.post-card{background:var(--panel);border:2px solid #222;padding:12px;margin-bottom:8px}
+.post-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.post-av{font-size:16px;width:28px;height:28px;border:2px solid #333;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+.post-author{font-size:6px;cursor:pointer}.post-author:hover{color:var(--gold)}
+.post-grade{font-size:5px;padding:2px 5px;background:var(--lapis);border:1px solid var(--lapis-l);margin-left:4px}
+.post-time{font-size:5px;color:#333;margin-left:auto}
+.post-content{font-size:7px;color:#ccc;line-height:2;margin-bottom:10px}
+.post-actions{display:flex;gap:8px}
+.post-action-btn{background:none;border:1px solid #222;color:#555;font-family:'Press Start 2P',monospace;font-size:5px;padding:4px 8px;cursor:pointer}
+.post-action-btn:hover{border-color:var(--gold);color:var(--gold)}
+.post-action-btn.liked{border-color:var(--red);color:var(--red)}
+.post-comments{margin-top:10px;border-top:1px solid #1a1a1a;padding-top:8px;display:none}
+.comment{padding:5px 0;border-bottom:1px solid #111;font-size:5px;color:#888;line-height:1.8}
+.comment span{color:var(--lapis-l)}
+.comment-input-wrap{display:flex;gap:6px;margin-top:6px}
+.comment-input{flex:1;padding:6px 8px;background:#050510;border:2px solid #222;border-left-color:#333;border-top-color:#333;color:var(--text);font-family:'Press Start 2P',monospace;font-size:6px;outline:none}
+.comment-send{background:var(--lapis);border:2px solid var(--lapis-l);color:#fff;font-family:'Press Start 2P',monospace;font-size:5px;padding:6px 10px;cursor:pointer}
+
+/* ── PROFILE ── */
+.profile-header{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.profile-av-big{font-size:48px;width:80px;height:80px;border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.profile-info{flex:1}
+.profile-name{font-size:12px;color:var(--text);margin-bottom:6px}
+.profile-stats{display:flex;gap:12px;margin-top:8px}
+.pstat{font-size:5px;color:#666;text-align:center}
+.pstat span{display:block;font-size:9px;color:var(--diamond);margin-bottom:3px}
+.stat-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #111;font-size:5px}
+.stat-v{color:var(--diamond)}.stat-v.gold{color:var(--gold)}.stat-v.green{color:var(--green)}
+.follow-btn{background:var(--grass);border:2px solid var(--grass-l);border-right-color:#2a5a10;border-bottom-color:#2a5a10;color:#fff;font-family:'Press Start 2P',monospace;font-size:6px;padding:7px 14px;cursor:pointer;margin-top:8px}
+.follow-btn.following{background:#1a1a2a;border-color:#333}
+.follow-btn:active{transform:translate(1px,1px)}
+
+/* ── AVATAR EDIT ── */
+.av-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:10px}
+.av-opt{aspect-ratio:1;cursor:pointer;border:2px solid #222;background:#0a0a0a;display:flex;align-items:center;justify-content:center;font-size:22px}
+.av-opt:hover{border-color:var(--gold-d)}
+.av-opt.sel{border-color:var(--diamond);background:rgba(93,232,245,.08)}
+
+/* ── CHAT ── */
+.chat-layout{display:flex;gap:10px;height:calc(100vh - 120px)}
+.chat-users{width:180px;flex-shrink:0;background:var(--panel);border:2px solid #222;overflow-y:auto;padding:8px}
+.chat-user-item{display:flex;align-items:center;gap:7px;padding:6px 5px;cursor:pointer;border-bottom:1px solid #111;font-size:5px;color:#888}
+.chat-user-item:hover,.chat-user-item.active{background:rgba(26,79,160,.2);color:var(--text)}
+.chat-uav{font-size:14px;width:22px;height:22px;border:1px solid #333;display:flex;align-items:center;justify-content:center}
+.chat-main{flex:1;display:flex;flex-direction:column;gap:6px}
+.chat-msgs{flex:1;background:var(--panel);border:2px solid #222;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.msg{max-width:75%}.msg.me{align-self:flex-end}.msg.them{align-self:flex-start}
+.msg-bubble{padding:6px 9px;font-size:6px;line-height:1.8;border:2px solid}
+.msg.me .msg-bubble{background:rgba(26,79,160,.4);border-color:var(--lapis-l)}
+.msg.them .msg-bubble{background:rgba(20,20,20,.8);border-color:#2a2a2a;color:#bbb}
+.msg-meta{font-size:5px;color:#333;margin-top:2px}
+.chat-input-wrap{display:flex;gap:6px;flex-shrink:0}
+.chat-input{flex:1;padding:8px;background:#050510;border:2px solid #222;border-left-color:#444;border-top-color:#444;color:var(--text);font-family:'Press Start 2P',monospace;font-size:7px;outline:none}
+.chat-send{background:var(--lapis);border:2px solid var(--lapis-l);border-right-color:#0a2060;border-bottom-color:#0a2060;color:#fff;font-family:'Press Start 2P',monospace;font-size:6px;padding:8px 12px;cursor:pointer}
+
+/* ── SEARCH ── */
+.search-input{width:100%;padding:10px 12px;background:#050510;border:3px solid #222;border-left-color:#444;border-top-color:#444;color:var(--text);font-family:'Press Start 2P',monospace;font-size:8px;outline:none;margin-bottom:12px}
+.search-input:focus{border-left-color:var(--lapis-l)}
+.member-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--panel);border:2px solid #222;margin-bottom:6px;cursor:pointer}
+.member-card:hover{border-color:var(--gold)}
+.member-av{font-size:20px;width:36px;height:36px;border:2px solid #333;display:flex;align-items:center;justify-content:center}
+.member-name{font-size:7px;margin-bottom:3px}
+.member-info{font-size:5px;color:#555}
+
+/* ── ADMIN ── */
+.stat-card{background:var(--panel);border:2px solid #222;padding:14px;text-align:center;flex:1}
+.stat-card .num{font-size:20px;color:var(--diamond);display:block;margin-bottom:6px}
+.stat-card .lbl{font-size:5px;color:#555}
+.stats-grid{display:flex;gap:8px;margin-bottom:12px}
+
+/* ── NOTIFS ── */
+.notif-item{padding:8px;border-bottom:1px solid #111;font-size:6px;color:#888;line-height:1.8}
+.notif-item.unread{background:rgba(26,79,160,.1);color:var(--text)}
+
+/* LOGOUT BTN */
+.logout-btn{background:rgba(80,0,0,.5);border:2px solid #500;color:#ff8888;font-family:'Press Start 2P',monospace;font-size:5px;padding:5px 8px;cursor:pointer}
+.logout-btn:hover{border-color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- ════ LOGIN ════ -->
+<div class="screen active" id="screen-login">
+  <div class="login-box">
+    <div class="login-logo">LapieHUB</div>
+    <div class="login-sub">Social — Liveover Studios</div>
+    <label class="field-label">NOM &amp; PRÉNOM</label>
+    <input class="mc-input" id="inp-nom" type="text" placeholder="Ex: Martin Lucas" spellcheck="false" autocomplete="off">
+    <label class="field-label">MOT DE PASSE</label>
+    <input class="mc-input" id="inp-pass" type="password" placeholder="••••••••">
+    <button class="mc-btn" onclick="doLogin()">▶ SE CONNECTER</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div class="screen" id="screen-app">
+  <nav>
+    <div class="nav-logo">LapieHUB</div>
+    <div class="nav-links">
+      <button class="nav-btn active" id="btn-feed"   onclick="showView('feed')">🏠 FIL</button>
+      <button class="nav-btn"        id="btn-chat"   onclick="showView('chat')">💬 CHAT<span class="notif-dot" id="msg-dot"></span></button>
+      <button class="nav-btn"        id="btn-search" onclick="showView('search')">🔍 SEARCH</button>
+      <button class="nav-btn"        id="btn-notifs" onclick="showView('notifs')">🔔 NOTIFS<span class="notif-dot" id="notif-dot"></span></button>
+      <button class="nav-btn"        id="btn-avatar" onclick="showView('avatar')">🎨 AVATAR</button>
+      <button class="nav-btn"        id="btn-admin"  onclick="showView('admin')" style="display:none">⚙️ ADMIN</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="nav-profile" onclick="showProfile(currentUser?.nom)">
+        <div class="nav-av" id="nav-av">🐦</div>
+        <div>
+          <div class="nav-name" id="nav-name">—</div>
+          <div class="nav-solde" id="nav-solde">— LP</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">⎋</button>
+    </div>
+  </nav>
+
+  <!-- FEED -->
+  <div class="view active" id="view-feed">
+    <div class="panel">
+      <div class="ptitle">📝 NOUVEAU POST</div>
+      <div class="post-input-wrap">
+        <textarea class="post-textarea" id="post-content" placeholder="Quoi de neuf LapiéPunk ?" maxlength="500"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:5px;color:#333" id="char-count">0 / 500</span>
+          <button class="post-btn" onclick="submitPost()">▶ PUBLIER</button>
+        </div>
+      </div>
+    </div>
+    <div id="feed-posts"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="view" id="view-profile">
+    <div class="panel" id="profile-content"></div>
+    <div class="panel">
+      <div class="ptitle">📝 SES POSTS</div>
+      <div id="profile-posts"></div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="view" id="view-chat">
+    <div class="chat-layout">
+      <div class="chat-users">
+        <div style="font-size:5px;color:var(--gold);margin-bottom:8px">💬 MEMBRES</div>
+        <div id="chat-user-list"></div>
+      </div>
+      <div class="chat-main">
+        <div style="background:var(--panel);border:2px solid #222;padding:7px 10px;font-size:6px;color:var(--gold)" id="chat-with">⬅ Sélectionne un membre</div>
+        <div class="chat-msgs" id="chat-msgs"><div style="font-size:6px;color:#333;text-align:center;margin:auto">Sélectionne un membre pour chatter.</div></div>
+        <div class="chat-input-wrap">
+          <input class="chat-input" id="chat-input" placeholder="Ton message…" disabled>
+          <button class="chat-send" id="chat-send-btn" onclick="sendMsg()" disabled>▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="view" id="view-search">
+    <div class="panel">
+      <div class="ptitle">🔍 RECHERCHER UN MEMBRE</div>
+      <input class="search-input" id="search-input" placeholder="Nom du membre…" oninput="doSearch()">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <!-- NOTIFS -->
+  <div class="view" id="view-notifs">
+    <div class="panel">
+      <div class="ptitle">🔔 NOTIFICATIONS</div>
+      <div id="notifs-list"></div>
+    </div>
+  </div>
+
+  <!-- AVATAR -->
+  <div class="view" id="view-avatar">
+    <div class="panel">
+      <div class="ptitle">🎨 MON AVATAR</div>
+      <div style="font-size:6px;color:#555;margin-bottom:8px">Avatar actuel :</div>
+      <div style="font-size:48px;width:70px;height:70px;border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;margin-bottom:12px" id="av-preview-big">🐦</div>
+      <div style="font-size:6px;color:#888;margin-bottom:8px">Choisir :</div>
+      <div class="av-grid" id="av-grid"></div>
+      <button style="margin-top:12px;background:var(--grass);border:2px solid var(--grass-l);border-right-color:#2a5a10;border-bottom-color:#2a5a10;color:#fff;font-family:'Press Start 2P',monospace;font-size:7px;padding:9px 18px;cursor:pointer" onclick="saveAvatar()">💾 SAUVEGARDER</button>
+      <div style="font-size:5px;color:var(--green);margin-top:6px;min-height:14px" id="av-saved-msg"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="view" id="view-admin">
+    <div class="panel">
+      <div class="ptitle">⚙️ PANEL ADMIN — Liveover Studios</div>
+      <div class="stats-grid" id="admin-stats"></div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">📝 TOUS LES POSTS</div>
+      <div id="admin-posts"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const AVATARS = ['🐦','⛏️','🗡️','🧙','🏹','🛡️','🔥','❄️','⚡','🌊','🌿','💀','🤖','🦊','🐺','🦅','🐉','🦁','🐸','🦝','🍄','💎','⭐','🎭'];
+const ADMINS  = ['Maxime SANCHIS','Maël FRIDEL'];
+
+let token = localStorage.getItem('lh_token');
+let currentUser = JSON.parse(localStorage.getItem('lh_user') || 'null');
+let chatTarget = null;
+let ws = null;
+let pendingAvatar = null;
+
+// ── INIT ──────────────────────────────────────────────────────────
+if (token && currentUser) initApp();
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch('/api' + path, opts);
+  return r.json();
+}
+
+// ── LOGIN ──────────────────────────────────────────────────────────
+async function doLogin() {
+  const nom  = document.getElementById('inp-nom').value.trim();
+  const pass = document.getElementById('inp-pass').value.trim();
+  const err  = document.getElementById('login-err');
+  if (!nom || !pass) { err.textContent = '⚠ Remplis tous les champs !'; return; }
+  err.textContent = '⏳ Connexion…';
+  try {
+    const data = await fetch('/api/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ nom, password: pass })
+    }).then(r => r.json());
+    if (data.success) {
+      token = data.token;
+      currentUser = data.user;
+      localStorage.setItem('lh_token', token);
+      localStorage.setItem('lh_user', JSON.stringify(currentUser));
+      initApp();
+    } else {
+      err.textContent = '❌ ' + (data.error || 'Identifiants incorrects');
+    }
+  } catch {
+    err.textContent = '⚠ Erreur de connexion';
+  }
+}
+document.getElementById('inp-pass').onkeydown = e => { if(e.key==='Enter') doLogin(); };
+document.getElementById('inp-nom').onkeydown  = e => { if(e.key==='Enter') document.getElementById('inp-pass').focus(); };
+
+// ── INIT APP ──────────────────────────────────────────────────────
+function initApp() {
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  const soldeRaw = String(currentUser.solde ?? '0').replace(/[^0-9.,]/g,'').replace(',','.');
+  const solde = parseFloat(soldeRaw) || 0;
+  document.getElementById('nav-name').textContent  = currentUser.nom;
+  document.getElementById('nav-solde').textContent = solde.toLocaleString('fr-FR') + ' LP';
+  const savedAv = localStorage.getItem('lh_av_' + currentUser.nom) || '🐦';
+  document.getElementById('nav-av').textContent = savedAv;
+  pendingAvatar = savedAv;
+  if (ADMINS.includes(currentUser.nom)) document.getElementById('btn-admin').style.display = 'block';
+  buildAvGrid();
+  loadFeed();
+  loadChatUsers();
+  connectWS();
+  checkNotifs();
+  setInterval(checkNotifs, 30000);
+}
+
+function logout() {
+  localStorage.removeItem('lh_token');
+  localStorage.removeItem('lh_user');
+  token = null; currentUser = null;
+  location.reload();
+}
+
+// ── VIEWS ──────────────────────────────────────────────────────────
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const btn = document.getElementById('btn-' + name);
+  if (btn) btn.classList.add('active');
+  if (name === 'notifs') loadNotifs();
+  if (name === 'admin') loadAdmin();
+  if (name === 'avatar') { document.getElementById('av-preview-big').textContent = localStorage.getItem('lh_av_'+currentUser.nom)||'🐦'; }
+}
+
+// ── FEED ──────────────────────────────────────────────────────────
+document.getElementById('post-content').oninput = function() {
+  document.getElementById('char-count').textContent = this.value.length + ' / 500';
+};
+
+async function loadFeed() {
+  const posts = await api('GET', '/posts');
+  const container = document.getElementById('feed-posts');
+  if (!posts.length) { container.innerHTML = '<div style="font-size:6px;color:#333;text-align:center;padding:20px">Aucun post pour l\'instant. Sois le premier !</div>'; return; }
+  container.innerHTML = posts.map(p => renderPost(p)).join('');
+}
+
+function renderPost(p) {
+  const av = p.avatar || '🐦';
+  const time = new Date(p.created_at).toLocaleDateString('fr-FR');
+  return `<div class="post-card" id="post-${p.id}">
+    <div class="post-header">
+      <div class="post-av" onclick="showProfile('${esc(p.author)}')">${av}</div>
+      <div>
+        <span class="post-author" onclick="showProfile('${esc(p.author)}')">${esc(p.author)}</span>
+        <span class="post-grade">${p.grade||''}</span>
+      </div>
+      <div class="post-time">${time}</div>
+    </div>
+    <div class="post-content">${esc(p.content)}</div>
+    <div class="post-actions">
+      <button class="post-action-btn ${p.user_liked?'liked':''}" onclick="toggleLike(${p.id},this)">❤ ${p.likes}</button>
+      <button class="post-action-btn" onclick="toggleComments(${p.id})">💬 ${p.comment_count}</button>
+      ${p.author === currentUser?.nom || ADMINS.includes(currentUser?.nom) ? `<button class="post-action-btn" onclick="deletePost(${p.id})" style="margin-left:auto;color:var(--red);border-color:#500">🗑</button>` : ''}
+    </div>
+    <div class="post-comments" id="comments-${p.id}">
+      <div id="comments-list-${p.id}"></div>
+      <div class="comment-input-wrap">
+        <input class="comment-input" id="comment-input-${p.id}" placeholder="Commenter…">
+        <button class="comment-send" onclick="submitComment(${p.id})">▶</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function submitPost() {
+  const content = document.getElementById('post-content').value.trim();
+  if (!content) return;
+  await api('POST', '/posts', { content });
+  document.getElementById('post-content').value = '';
+  document.getElementById('char-count').textContent = '0 / 500';
+  loadFeed();
+}
+
+async function toggleLike(id, btn) {
+  const data = await api('POST', `/posts/${id}/like`);
+  btn.classList.toggle('liked', data.liked);
+  const currentLikes = parseInt(btn.textContent.replace('❤ ',''));
+  btn.textContent = '❤ ' + (data.liked ? currentLikes + 1 : currentLikes - 1);
+}
+
+async function toggleComments(id) {
+  const box = document.getElementById('comments-' + id);
+  if (box.style.display === 'block') { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  const comments = await api('GET', `/posts/${id}/comments`);
+  document.getElementById('comments-list-' + id).innerHTML = comments.map(c =>
+    `<div class="comment"><span>${esc(c.author)}</span> : ${esc(c.content)}</div>`
+  ).join('') || '<div class="comment" style="color:#333">Aucun commentaire.</div>';
+  document.getElementById('comment-input-' + id).onkeydown = e => { if(e.key==='Enter') submitComment(id); };
+}
+
+async function submitComment(id) {
+  const inp = document.getElementById('comment-input-' + id);
+  if (!inp.value.trim()) return;
+  await api('POST', `/posts/${id}/comments`, { content: inp.value.trim() });
+  inp.value = '';
+  const comments = await api('GET', `/posts/${id}/comments`);
+  document.getElementById('comments-list-' + id).innerHTML = comments.map(c =>
+    `<div class="comment"><span>${esc(c.author)}</span> : ${esc(c.content)}</div>`
+  ).join('');
+}
+
+async function deletePost(id) {
+  if (!confirm('Supprimer ce post ?')) return;
+  await api('DELETE', `/posts/${id}`);
+  document.getElementById('post-' + id)?.remove();
+}
+
+// ── PROFILE ──────────────────────────────────────────────────────
+async function showProfile(nom) {
+  showView('profile');
+  const data = await api('GET', `/users/${encodeURIComponent(nom)}`);
+  const av = data.avatar || '🐦';
+  const solde = parseFloat(String(data.solde||'0').replace(/[^0-9.,]/g,'').replace(',','.')) || 0;
+  const isFollowing = data.followers > 0; // simplified
+  const isSelf = nom === currentUser?.nom;
+  document.getElementById('profile-content').innerHTML = `
+    <div class="profile-header">
+      <div class="profile-av-big">${av}</div>
+      <div class="profile-info">
+        <div class="profile-name">${esc(data.nom)}</div>
+        <div style="font-size:6px;color:#555;margin-top:4px">${data.classe||''} — ${data.grade||''}</div>
+        <div class="profile-stats">
+          <div class="pstat"><span>${data.followers}</span>FOLLOWERS</div>
+          <div class="pstat"><span>${data.following}</span>FOLLOWING</div>
+          <div class="pstat"><span>${data.posts?.length||0}</span>POSTS</div>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          ${!isSelf ? `<button class="follow-btn" onclick="toggleFollow('${esc(nom)}',this)">+ FOLLOW</button>` : ''}
+          ${!isSelf ? `<button class="follow-btn" style="background:var(--lapis)" onclick="startChat('${esc(nom)}')">💬 MSG</button>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="ptitle">STATS</div>
+    <div class="stat-row"><span>SOLDE</span><span class="stat-v gold">${solde.toLocaleString('fr-FR')} LP</span></div>
+    <div class="stat-row"><span>PASS LAPIA</span><span class="stat-v green">${data.pass_lapia||'—'}</span></div>
+    <div class="stat-row"><span>ASSURANCE</span><span class="stat-v green">${data.assurance||'—'}</span></div>
+  `;
+  document.getElementById('profile-posts').innerHTML = (data.posts||[]).map(p => renderPost({...p, avatar: av, grade: data.grade})).join('') || '<div style="font-size:6px;color:#333;text-align:center;padding:12px">Aucun post.</div>';
+}
+
+async function toggleFollow(nom, btn) {
+  const data = await api('POST', `/follow/${encodeURIComponent(nom)}`);
+  btn.textContent = data.following ? '✓ SUIVI' : '+ FOLLOW';
+  btn.classList.toggle('following', data.following);
+}
+
+// ── CHAT ──────────────────────────────────────────────────────────
+async function loadChatUsers() {
+  const users = await api('GET', '/users');
+  const list = document.getElementById('chat-user-list');
+  list.innerHTML = users.filter(u => u.nom !== currentUser?.nom).map(u => `
+    <div class="chat-user-item" onclick="openChat('${esc(u.nom)}',this)">
+      <div class="chat-uav">${u.avatar||'🐦'}</div>
+      <div style="font-size:5px">${esc(u.nom)}</div>
+    </div>`).join('');
+}
+
+async function openChat(nom, el) {
+  chatTarget = nom;
+  document.querySelectorAll('.chat-user-item').forEach(x => x.classList.remove('active'));
+  el?.classList.add('active');
+  document.getElementById('chat-with').textContent = '💬 ' + nom;
+  document.getElementById('chat-input').disabled = false;
+  document.getElementById('chat-send-btn').disabled = false;
+  const msgs = await api('GET', `/messages/${encodeURIComponent(nom)}`);
+  renderMessages(msgs);
+}
+
+function renderMessages(msgs) {
+  const box = document.getElementById('chat-msgs');
+  if (!msgs.length) { box.innerHTML = '<div style="font-size:6px;color:#333;text-align:center;margin:auto">Commence la conversation !</div>'; return; }
+  box.innerHTML = msgs.map(m => `
+    <div class="msg ${m.from_user === currentUser?.nom ? 'me' : 'them'}">
+      <div class="msg-bubble">${esc(m.content)}</div>
+      <div class="msg-meta">${m.from_user === currentUser?.nom ? 'Toi' : esc(m.from_user)}</div>
+    </div>`).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendMsg() {
+  const inp = document.getElementById('chat-input');
+  if (!chatTarget || !inp.value.trim()) return;
+  await api('POST', `/messages/${encodeURIComponent(chatTarget)}`, { content: inp.value.trim() });
+  inp.value = '';
+  openChat(chatTarget, null);
+}
+document.getElementById('chat-input').onkeydown = e => { if(e.key==='Enter') sendMsg(); };
+
+function startChat(nom) {
+  showView('chat');
+  const items = document.querySelectorAll('.chat-user-item');
+  items.forEach(item => { if(item.textContent.includes(nom)) openChat(nom, item); });
+}
+
+// ── SEARCH ──────────────────────────────────────────────────────
+let allUsers = [];
+api('GET', '/users').then(u => allUsers = u);
+
+function doSearch() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const results = allUsers.filter(u => u.nom.toLowerCase().includes(q) && u.nom !== currentUser?.nom);
+  document.getElementById('search-results').innerHTML = results.map(u => `
+    <div class="member-card" onclick="showProfile('${esc(u.nom)}')">
+      <div class="member-av">${u.avatar||'🐦'}</div>
+      <div>
+        <div class="member-name">${esc(u.nom)}</div>
+        <div class="member-info">${u.classe||''} — ${u.grade||''}</div>
+      </div>
+    </div>`).join('') || '<div style="font-size:6px;color:#333;text-align:center;padding:12px">Aucun résultat.</div>';
+}
+
+// ── NOTIFS ──────────────────────────────────────────────────────
+async function checkNotifs() {
+  try {
+    const data = await api('GET', '/notifications/count');
+    const dot = document.getElementById('notif-dot');
+    if (dot) dot.style.display = data.count > 0 ? 'block' : 'none';
+  } catch {}
+}
+
+async function loadNotifs() {
+  const notifs = await api('GET', '/notifications');
+  document.getElementById('notif-dot').style.display = 'none';
+  document.getElementById('notifs-list').innerHTML = notifs.map(n => `
+    <div class="notif-item ${n.read ? '' : 'unread'}">${esc(n.content)}</div>`
+  ).join('') || '<div style="font-size:6px;color:#333;text-align:center;padding:12px">Aucune notification.</div>';
+}
+
+// ── AVATAR ──────────────────────────────────────────────────────
+function buildAvGrid() {
+  const saved = localStorage.getItem('lh_av_' + currentUser?.nom) || '🐦';
+  document.getElementById('av-grid').innerHTML = AVATARS.map(av => `
+    <div class="av-opt ${av === saved ? 'sel' : ''}" onclick="selectAv('${av}',this)">${av}</div>`).join('');
+}
+
+function selectAv(av, el) {
+  document.querySelectorAll('.av-opt').forEach(x => x.classList.remove('sel'));
+  el.classList.add('sel');
+  pendingAvatar = av;
+  document.getElementById('av-preview-big').textContent = av;
+}
+
+async function saveAvatar() {
+  if (!pendingAvatar) return;
+  localStorage.setItem('lh_av_' + currentUser?.nom, pendingAvatar);
+  document.getElementById('nav-av').textContent = pendingAvatar;
+  await api('PUT', '/users/avatar', { avatar: pendingAvatar });
+  const msg = document.getElementById('av-saved-msg');
+  msg.textContent = '✅ Avatar sauvegardé !';
+  setTimeout(() => msg.textContent = '', 2500);
+}
+
+// ── ADMIN ──────────────────────────────────────────────────────
+async function loadAdmin() {
+  const stats = await api('GET', '/admin/stats');
+  document.getElementById('admin-stats').innerHTML = [
+    ['Membres', stats.total_users],
+    ['Posts', stats.total_posts],
+    ['Likes', stats.total_likes],
+    ['Messages', stats.total_messages],
+  ].map(([l,v]) => `<div class="stat-card"><span class="num">${v}</span><div class="lbl">${l}</div></div>`).join('');
+  const posts = await api('GET', '/admin/posts');
+  document.getElementById('admin-posts').innerHTML = posts.map(p => `
+    <div style="padding:8px;border-bottom:1px solid #111;font-size:5px;display:flex;justify-content:space-between;align-items:center">
+      <div><span style="color:var(--lapis-l)">${esc(p.author)}</span> : ${esc(p.content.substring(0,60))}…</div>
+      <button class="post-action-btn" style="color:var(--red);border-color:#500" onclick="deletePost(${p.id})">🗑</button>
+    </div>`).join('');
+}
+
+// ── WEBSOCKET ──────────────────────────────────────────────────
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}`);
+  ws.onopen = () => ws.send(JSON.stringify({ type: 'auth', token }));
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (data.type === 'message') {
+      document.getElementById('msg-dot').style.display = 'block';
+      if (chatTarget === data.from) openChat(data.from, null);
+    }
+  };
+  ws.onclose = () => setTimeout(connectWS, 3000);
+}
+
+// ── UTILS ──────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showProfile(nom) {
+  showView('profile');
+  // reload
+  const btn = document.getElementById('btn-feed');
+  if(btn) btn.classList.remove('active');
+}
+// override to make profile accessible from feed
+const _showProfile = showProfile;
+window.showProfile = async function(nom) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-profile').classList.add('active');
+  const data = await api('GET', `/users/${encodeURIComponent(nom)}`);
+  const av = data.avatar || '🐦';
+  const solde = parseFloat(String(data.solde||'0').replace(/[^0-9.,]/g,'').replace(',','.')) || 0;
+  const isSelf = nom === currentUser?.nom;
+  document.getElementById('profile-content').innerHTML = `
+    <div class="profile-header">
+      <div class="profile-av-big">${av}</div>
+      <div class="profile-info">
+        <div class="profile-name">${esc(data.nom)}</div>
+        <div style="font-size:6px;color:#555;margin-top:4px">${data.classe||''} — ${data.grade||''}</div>
+        <div class="profile-stats">
+          <div class="pstat"><span>${data.followers}</span>FOLLOWERS</div>
+          <div class="pstat"><span>${data.following}</span>FOLLOWING</div>
+          <div class="pstat"><span>${data.posts?.length||0}</span>POSTS</div>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          ${!isSelf ? `<button class="follow-btn" onclick="toggleFollow('${esc(nom)}',this)">+ FOLLOW</button>` : ''}
+          ${!isSelf ? `<button class="follow-btn" style="background:var(--lapis)" onclick="startChat('${esc(nom)}')">💬 MSG</button>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="ptitle">STATS</div>
+    <div class="stat-row"><span>SOLDE</span><span class="stat-v gold">${solde.toLocaleString('fr-FR')} LP</span></div>
+    <div class="stat-row"><span>PASS LAPIA</span><span class="stat-v green">${data.pass_lapia||'—'}</span></div>
+    <div class="stat-row"><span>ASSURANCE</span><span class="stat-v green">${data.assurance||'—'}</span></div>
+  `;
+  document.getElementById('profile-posts').innerHTML = (data.posts||[]).map(p => renderPost({...p, avatar: av, grade: data.grade})).join('') || '<div style="font-size:6px;color:#333;text-align:center;padding:12px">Aucun post.</div>';
+};
+</script>
+</body>
+</html>
